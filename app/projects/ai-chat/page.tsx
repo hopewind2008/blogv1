@@ -2,7 +2,6 @@
 
 import { useState } from 'react'
 import { Navigation } from '@/components/Navigation'
-import { Button } from '@/components/ui/button'
 import { LoadingSpinner } from '@/components/ui/loading'
 import { Moon, Sun, Star, Wand2 } from 'lucide-react'
 import Image from 'next/image'
