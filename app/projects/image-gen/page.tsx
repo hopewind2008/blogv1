@@ -18,10 +18,6 @@ interface AnalysisResult {
   occasions: string[]
 }
 
-interface ApiResponse {
-  analysis: AnalysisResult
-}
-
 export default function ImageGenPage() {
   const [selectedFile, setSelectedFile] = useState<File | null>(null)
   const [previewUrl, setPreviewUrl] = useState<string>('')
@@ -98,7 +94,7 @@ export default function ImageGenPage() {
   }
 
   const handleGenerate = async () => {
-    if (!analysisResult?.analysis?.recommendations || !previewUrl) return
+    if (!analysisResult?.recommendations || !previewUrl) return
 
     setLoading(true)
     try {
@@ -108,7 +104,7 @@ export default function ImageGenPage() {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          prompt: analysisResult.analysis.recommendations.join(', '),
+          prompt: analysisResult.recommendations.join(', '),
           imageUrl: previewUrl,
         }),
       })
@@ -216,19 +212,19 @@ export default function ImageGenPage() {
                   <div className="bg-white/5 rounded-lg p-3 md:p-4 border border-white/10 hover:border-blue-400/50 transition-colors">
                     <p className="text-base md:text-lg font-semibold text-gray-300">总体评分</p>
                     <p className="text-2xl md:text-3xl font-bold bg-gradient-to-r from-blue-400 to-violet-400 text-transparent bg-clip-text">
-                      {analysisResult.analysis.scores.overall.toFixed(1)}
+                      {analysisResult.scores.overall.toFixed(1)}
                     </p>
                   </div>
                   <div className="bg-white/5 rounded-lg p-3 md:p-4 border border-white/10 hover:border-blue-400/50 transition-colors">
                     <p className="text-base md:text-lg font-semibold text-gray-300">风格统一</p>
                     <p className="text-2xl md:text-3xl font-bold bg-gradient-to-r from-blue-400 to-violet-400 text-transparent bg-clip-text">
-                      {analysisResult.analysis.scores.style.toFixed(1)}
+                      {analysisResult.scores.style.toFixed(1)}
                     </p>
                   </div>
                   <div className="col-span-2 md:col-span-1 bg-white/5 rounded-lg p-3 md:p-4 border border-white/10 hover:border-blue-400/50 transition-colors">
                     <p className="text-base md:text-lg font-semibold text-gray-300">实用性</p>
                     <p className="text-2xl md:text-3xl font-bold bg-gradient-to-r from-blue-400 to-violet-400 text-transparent bg-clip-text">
-                      {analysisResult.analysis.scores.practicality.toFixed(1)}
+                      {analysisResult.scores.practicality.toFixed(1)}
                     </p>
                   </div>
                 </div>
@@ -237,7 +233,7 @@ export default function ImageGenPage() {
                 <div className="mb-4 md:mb-6">
                   <h4 className="text-base md:text-lg font-semibold mb-2 md:mb-3 text-blue-400">搭配优点</h4>
                   <ul className="list-disc list-inside space-y-1.5 md:space-y-2 text-sm md:text-base text-gray-300">
-                    {analysisResult.analysis.advantages.map((adv: string, i: number) => (
+                    {analysisResult.advantages.map((adv: string, i: number) => (
                       <li key={i} className="hover:text-blue-400 transition-colors">{adv}</li>
                     ))}
                   </ul>
@@ -247,7 +243,7 @@ export default function ImageGenPage() {
                 <div className="mb-4 md:mb-6">
                   <h4 className="text-base md:text-lg font-semibold mb-2 md:mb-3 text-violet-400">搭配建议</h4>
                   <ul className="list-disc list-inside space-y-1.5 md:space-y-2 text-sm md:text-base text-gray-300">
-                    {analysisResult.analysis.recommendations.map((rec: string, i: number) => (
+                    {analysisResult.recommendations.map((rec: string, i: number) => (
                       <li key={i} className="hover:text-violet-400 transition-colors">{rec}</li>
                     ))}
                   </ul>
@@ -257,7 +253,7 @@ export default function ImageGenPage() {
                 <div className="mb-4 md:mb-6">
                   <h4 className="text-base md:text-lg font-semibold mb-2 md:mb-3 text-blue-400">适合场合</h4>
                   <ul className="list-disc list-inside space-y-1.5 md:space-y-2 text-sm md:text-base text-gray-300">
-                    {analysisResult.analysis.occasions.map((occ: string, i: number) => (
+                    {analysisResult.occasions.map((occ: string, i: number) => (
                       <li key={i} className="hover:text-blue-400 transition-colors">{occ}</li>
                     ))}
                   </ul>
