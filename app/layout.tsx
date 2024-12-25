@@ -1,9 +1,16 @@
 import './globals.css'
 import { Inter } from 'next/font/google'
-import { Metadata } from 'next'
+import { Metadata, Viewport } from 'next'
 import { ProgressBar } from '@/components/progress-bar'
+import { Suspense } from 'react'
 
 const inter = Inter({ subsets: ['latin'] })
+
+export const viewport: Viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  maximumScale: 5,
+}
 
 export const metadata: Metadata = {
   title: '神秘实验室 | Mystery AI Lab',
@@ -38,11 +45,6 @@ export const metadata: Metadata = {
     description: '探索人工智能的未来，分享前沿科技见解，展示创新项目成果。',
     images: ['/og-image.png'],
   },
-  viewport: {
-    width: 'device-width',
-    initialScale: 1,
-    maximumScale: 5,
-  },
   icons: {
     icon: '/favicon.ico',
     apple: '/apple-icon.png',
@@ -62,7 +64,9 @@ export default function RootLayout({
         <link rel="manifest" href="/manifest.json" />
       </head>
       <body className={`${inter.className} antialiased`}>
-        <ProgressBar />
+        <Suspense fallback={null}>
+          <ProgressBar />
+        </Suspense>
         <div className="flex min-h-screen flex-col">
           {children}
         </div>
