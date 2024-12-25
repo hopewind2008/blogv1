@@ -1,7 +1,4 @@
 import { NextResponse } from 'next/server'
-import { GoogleGenerativeAI } from '@google/generative-ai'
-
-const genAI = new GoogleGenerativeAI(process.env.GOOGLE_API_KEY || '')
 
 // 清理响应文本，提取 JSON 内容
 function extractJSON(text: string): string {
@@ -34,27 +31,86 @@ export async function POST(request: Request) {
     // 将文件转换为字节数组
     const bytes = await file.arrayBuffer()
     const buffer = Buffer.from(bytes)
-
-    // 初始化 Gemini 模型
-    const model = genAI.getGenerativeModel({ model: 'gemini-pro-vision' })
+    const base64Image = buffer.toString('base64')
 
     // 调用 Gemini API 分析图片
-    const result = await model.generateContent([
+    const response = await fetch(
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-pro-vision:generateContent?key=AIzaSyCiZNOlYHtzgCSiGHRRhXoyd93_DirDSbo`,
       {
-        text: '分析这张穿搭照片，返回一个 JSON 对象，包含以下字段：scores（包含 overall、style、practicality 三个 1-10 的数字评分），advantages（3-5个优点），recommendations（3-5个建议），occasions（2-3个适合场合）。直接返回 JSON 对象，不要包含其他文本。'
-      },
-      {
-        inlineData: {
-          mimeType: file.type,
-          data: buffer.toString('base64')
-        }
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          contents: [{
+            parts: [
+              {
+                text: 'Please analyze this image and provide a JSON response with the following structure: {"scores":{"overall":number,"style":number,"practicality":number},"advantages":string[],"recommendations":string[],"occasions":string[]}. The scores should be between 1-10, advantages should list 3-5 positive points, recommendations should provide 3-5 suggestions, and occasions should list 2-3 suitable scenarios. Please respond with ONLY the JSON object, no additional text.'
+              },
+              {
+                inline_data: {
+                  mime_type: file.type,
+                  data: base64Image
+                }
+              }
+            ]
+          }],
+          generationConfig: {
+            temperature: 0.4,
+            topK: 32,
+            topP: 1,
+            maxOutputTokens: 1024,
+          },
+          safetySettings: [
+            {
+              category: "HARM_CATEGORY_HARASSMENT",
+              threshold: "BLOCK_MEDIUM_AND_ABOVE"
+            },
+            {
+              category: "HARM_CATEGORY_HATE_SPEECH",
+              threshold: "BLOCK_MEDIUM_AND_ABOVE"
+            },
+            {
+              category: "HARM_CATEGORY_SEXUALLY_EXPLICIT",
+              threshold: "BLOCK_MEDIUM_AND_ABOVE"
+            },
+            {
+              category: "HARM_CATEGORY_DANGEROUS_CONTENT",
+              threshold: "BLOCK_MEDIUM_AND_ABOVE"
+            }
+          ]
+        })
       }
-    ])
+    )
 
-    const response = await result.response
-    const content = response.text()
-    
-    console.log('原始响应:', content)
+    if (!response.ok) {
+      const error = await response.json()
+      console.error('API 错误:', error)
+      
+      if (error.error?.status === 'PERMISSION_DENIED') {
+        throw new Error('API 密钥无效或已过期')
+      }
+      
+      if (error.error?.message?.includes('SAFETY')) {
+        throw new Error('图片内容不符合安全策略，请尝试上传其他图片')
+      }
+      
+      throw new Error(error.error?.message || 'API 请求失败')
+    }
+
+    const data = await response.json()
+    console.log('原始响应:', data)
+
+    if (data.promptFeedback?.safetyRatings?.some(r => r.probability === 'HIGH' || r.probability === 'MEDIUM')) {
+      throw new Error('图片内容不符合安全策略，请尝试上传其他图片')
+    }
+
+    if (!data.candidates?.[0]?.content?.parts?.[0]?.text) {
+      throw new Error('无效的响应格式')
+    }
+
+    const content = data.candidates[0].content.parts[0].text
+    console.log('API 返回文本:', content)
 
     try {
       // 清理并解析 JSON 响应
