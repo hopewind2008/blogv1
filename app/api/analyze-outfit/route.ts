@@ -35,7 +35,7 @@ export async function POST(request: Request) {
 
     // 调用 Gemini API 分析图片
     const response = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-pro-vision:generateContent?key=AIzaSyCiZNOlYHtzgCSiGHRRhXoyd93_DirDSbo`,
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=AIzaSyCiZNOlYHtzgCSiGHRRhXoyd93_DirDSbo`,
       {
         method: 'POST',
         headers: {
@@ -56,27 +56,29 @@ export async function POST(request: Request) {
             ]
           }],
           generationConfig: {
-            temperature: 0.4,
-            topK: 32,
-            topP: 1,
-            maxOutputTokens: 1024,
+            temperature: 0.2,
+            topK: 1,
+            topP: 0.8,
+            maxOutputTokens: 2048,
+            candidateCount: 1,
+            stopSequences: ["}"]
           },
           safetySettings: [
             {
               category: "HARM_CATEGORY_HARASSMENT",
-              threshold: "BLOCK_MEDIUM_AND_ABOVE"
+              threshold: "BLOCK_ONLY_HIGH"
             },
             {
               category: "HARM_CATEGORY_HATE_SPEECH",
-              threshold: "BLOCK_MEDIUM_AND_ABOVE"
+              threshold: "BLOCK_ONLY_HIGH"
             },
             {
               category: "HARM_CATEGORY_SEXUALLY_EXPLICIT",
-              threshold: "BLOCK_MEDIUM_AND_ABOVE"
+              threshold: "BLOCK_ONLY_HIGH"
             },
             {
               category: "HARM_CATEGORY_DANGEROUS_CONTENT",
-              threshold: "BLOCK_MEDIUM_AND_ABOVE"
+              threshold: "BLOCK_ONLY_HIGH"
             }
           ]
         })
@@ -101,7 +103,7 @@ export async function POST(request: Request) {
     const data = await response.json()
     console.log('原始响应:', data)
 
-    if (data.promptFeedback?.safetyRatings?.some(r => r.probability === 'HIGH' || r.probability === 'MEDIUM')) {
+    if (data.promptFeedback?.safetyRatings?.some(r => r.probability === 'HIGH')) {
       throw new Error('图片内容不符合安全策略，请尝试上传其他图片')
     }
 
