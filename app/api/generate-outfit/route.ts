@@ -17,9 +17,9 @@ export async function POST(request: Request) {
 
     console.log('开始生成图片，提示词:', prompt)
 
-    // 调用 Stable Diffusion API 生成图片
+    // 调用 Hugging Face API 生成图片
     const response = await fetch(
-      'https://api-inference.huggingface.co/models/runwayml/stable-diffusion-v1-5',
+      'https://api-inference.huggingface.co/models/prompthero/openjourney',
       {
         method: 'POST',
         headers: {
@@ -27,8 +27,9 @@ export async function POST(request: Request) {
           'Authorization': `Bearer ${process.env.HUGGING_FACE_API_KEY}`
         },
         body: JSON.stringify({
-          inputs: `A high-quality fashion outfit photo: ${prompt}. Full body shot, professional photography, high resolution, detailed fabric texture, fashion magazine style.`,
-          wait_for_model: true
+          inputs: `fashion photography of outfit with ${prompt}, professional studio lighting, high resolution, detailed fabric texture, fashion magazine style, mdjrny-v4 style`,
+          wait_for_model: true,
+          use_cache: false
         })
       }
     )
@@ -56,7 +57,7 @@ export async function POST(request: Request) {
       throw new Error('API 返回了无效的响应格式')
     }
 
-    // Stable Diffusion API 返回二进制图片数据
+    // API 返回二进制图片数据
     const imageBuffer = await response.arrayBuffer()
     console.log('获取到图片数据，大小:', imageBuffer.byteLength)
 
