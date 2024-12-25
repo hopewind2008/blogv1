@@ -3,227 +3,287 @@
 import { useState } from 'react'
 import { Navigation } from '@/components/Navigation'
 import { LoadingSpinner } from '@/components/ui/loading'
-import { Upload, Image as ImageIcon, Wand2 } from 'lucide-react'
+import { CloudUpload, Image as ImageIcon, Wand2 } from 'lucide-react'
 import Image from 'next/image'
+import './styles.css'
 
 export default function ImageGenPage() {
-  const [selectedImage, setSelectedImage] = useState<File | null>(null)
-  const [imagePreview, setImagePreview] = useState<string>('')
+  const [selectedFile, setSelectedFile] = useState<File | null>(null)
+  const [previewUrl, setPreviewUrl] = useState<string>('')
+  const [generatedUrl, setGeneratedUrl] = useState<string>('')
   const [loading, setLoading] = useState(false)
   const [analysisResult, setAnalysisResult] = useState<any>(null)
 
-  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
+    if (!file) return
+
+    // 检查文件类型
+    const validTypes = ['image/jpeg', 'image/jpg', 'image/png']
+    if (!validTypes.includes(file.type)) {
+      alert('请上传 JPG 或 PNG 格式的图片')
+      return
+    }
+
+    setSelectedFile(file)
+    const reader = new FileReader()
+    reader.onload = (e) => {
+      setPreviewUrl(e.target?.result as string)
+    }
+    reader.readAsDataURL(file)
+  }
+
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault()
+    const file = e.dataTransfer.files[0]
     if (file) {
-      setSelectedImage(file)
+      const validTypes = ['image/jpeg', 'image/jpg', 'image/png']
+      if (!validTypes.includes(file.type)) {
+        alert('请上传 JPG 或 PNG 格式的图片')
+        return
+      }
+      setSelectedFile(file)
       const reader = new FileReader()
-      reader.onloadend = () => {
-        setImagePreview(reader.result as string)
+      reader.onload = (e) => {
+        setPreviewUrl(e.target?.result as string)
       }
       reader.readAsDataURL(file)
     }
   }
 
-  const handleDrop = (e: React.DragEvent<HTMLDivElement>) => {
-    e.preventDefault()
-    const file = e.dataTransfer.files?.[0]
-    if (file && file.type.startsWith('image/')) {
-      setSelectedImage(file)
-      const reader = new FileReader()
-      reader.onloadend = () => {
-        setImagePreview(reader.result as string)
-      }
-      reader.readAsDataURL(file)
-    }
-  }
-
-  const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
+  const handleDragOver = (e: React.DragEvent) => {
     e.preventDefault()
   }
 
-  const handleSubmit = async () => {
-    if (!selectedImage) return
+  const handleAnalyze = async () => {
+    if (!selectedFile) return
 
     setLoading(true)
-    try {
-      const formData = new FormData()
-      formData.append('image', selectedImage)
+    const formData = new FormData()
+    formData.append('file', selectedFile)
 
-      const response = await fetch('/api/image-gen/analyze', {
+    try {
+      const response = await fetch('/api/analyze-outfit', {
         method: 'POST',
         body: formData,
       })
 
-      if (!response.ok) {
-        throw new Error('分析失败')
+      const data = await response.json()
+      if (data.error) {
+        throw new Error(data.error)
       }
 
-      const result = await response.json()
-      setAnalysisResult(result)
+      setAnalysisResult(data)
     } catch (error) {
-      console.error('分析错误:', error)
-      alert('分析失败，请重试')
+      console.error('Error:', error)
+      alert('分析图片时出错：' + (error as Error).message)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const handleGenerate = async () => {
+    if (!analysisResult?.analysis?.recommendations || !previewUrl) return
+
+    setLoading(true)
+    try {
+      const response = await fetch('/api/generate-outfit', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          prompt: analysisResult.analysis.recommendations.join(', '),
+          imageUrl: previewUrl,
+        }),
+      })
+
+      const data = await response.json()
+      if (data.error) {
+        throw new Error(data.error)
+      }
+
+      setGeneratedUrl(data.image_url)
+    } catch (error) {
+      console.error('Error:', error)
+      alert('生成图片时出错：' + (error as Error).message)
     } finally {
       setLoading(false)
     }
   }
 
   return (
-    <div className="min-h-screen bg-black text-white pb-8 md:pb-16">
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 text-gray-100">
       <Navigation />
       
-      <div className="container mx-auto px-4 md:px-6 py-8 md:py-16">
+      <div className="container mx-auto px-4 md:px-6 py-6 md:py-12">
         <div className="max-w-4xl mx-auto">
-          <div className="text-center mb-8 md:mb-12">
-            <h1 className="text-3xl md:text-4xl font-bold mb-4">AI 穿搭分析</h1>
-            <p className="text-gray-400">上传你的穿搭照片，获取 AI 的专业分析和建议</p>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+          <div className="bg-white/5 backdrop-blur-lg rounded-2xl p-4 md:p-8 border border-white/10 shadow-xl">
+            <h1 className="text-2xl md:text-3xl font-bold text-center mb-6 md:mb-8 bg-gradient-to-r from-blue-400 to-violet-400 text-transparent bg-clip-text">
+              AI 穿搭分析
+            </h1>
+            
             {/* 上传区域 */}
-            <div
-              className="border-2 border-dashed border-gray-700 rounded-lg p-8 text-center cursor-pointer hover:border-purple-500 transition-colors"
-              onDrop={handleDrop}
-              onDragOver={handleDragOver}
-              onClick={() => document.getElementById('fileInput')?.click()}
-            >
-              <input
-                type="file"
-                id="fileInput"
-                accept="image/*"
-                className="hidden"
-                onChange={handleImageChange}
-              />
-              <Upload className="mx-auto h-12 w-12 text-gray-400 mb-4" />
-              <p className="text-gray-400 mb-2">点击或拖拽图片到这里上传</p>
-              <p className="text-sm text-gray-500">支持 JPG、PNG 格式</p>
+            <div className="mb-6 md:mb-8">
+              <div
+                className="border-2 border-dashed border-white/20 rounded-xl p-6 md:p-8 text-center cursor-pointer hover:border-blue-400/50 hover:bg-blue-400/5 transition-all duration-300"
+                onClick={() => document.getElementById('fileInput')?.click()}
+                onDrop={handleDrop}
+                onDragOver={handleDragOver}
+              >
+                <input
+                  type="file"
+                  id="fileInput"
+                  accept="image/*"
+                  className="hidden"
+                  onChange={handleFileSelect}
+                />
+                <CloudUpload className="w-10 h-10 md:w-12 md:h-12 mx-auto mb-3 md:mb-4 text-blue-400" />
+                <p className="text-base md:text-lg mb-2">点击或拖拽图片到这里上传</p>
+                <p className="text-xs md:text-sm text-gray-400">支持 jpg、jpeg、png 格式</p>
+              </div>
             </div>
 
             {/* 预览区域 */}
-            <div className="border border-gray-800 rounded-lg p-4">
-              <h3 className="text-lg font-medium mb-4 flex items-center gap-2">
-                <ImageIcon className="h-5 w-5 text-purple-400" />
-                图片预览
-              </h3>
-              <div className="aspect-square relative bg-gray-900 rounded-lg overflow-hidden">
-                {imagePreview ? (
-                  <Image
-                    src={imagePreview}
-                    alt="Preview"
-                    fill
-                    className="object-contain"
-                  />
-                ) : (
-                  <div className="flex items-center justify-center h-full text-gray-500">
-                    暂无图片
-                  </div>
-                )}
+            <div className="grid md:grid-cols-2 gap-4 md:gap-6 mb-6 md:mb-8">
+              <div className="bg-white/5 rounded-xl p-4 border border-white/10">
+                <h3 className="text-base md:text-lg font-semibold mb-3 md:mb-4 flex items-center gap-2 text-blue-400">
+                  <ImageIcon className="w-4 h-4 md:w-5 md:h-5" />
+                  上传图片预览
+                </h3>
+                <div className="aspect-square relative rounded-lg overflow-hidden bg-black/20">
+                  {previewUrl ? (
+                    <Image
+                      src={previewUrl}
+                      alt="Preview"
+                      fill
+                      className="object-contain"
+                    />
+                  ) : (
+                    <div className="absolute inset-0 flex items-center justify-center text-sm md:text-base text-gray-400">
+                      暂无图片
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              <div className="bg-white/5 rounded-xl p-4 border border-white/10">
+                <h3 className="text-base md:text-lg font-semibold mb-3 md:mb-4 flex items-center gap-2 text-violet-400">
+                  <Wand2 className="w-4 h-4 md:w-5 md:h-5" />
+                  AI 生成穿搭
+                </h3>
+                <div className="aspect-square relative rounded-lg overflow-hidden bg-black/20">
+                  {generatedUrl ? (
+                    <Image
+                      src={generatedUrl}
+                      alt="Generated"
+                      fill
+                      className="object-contain"
+                    />
+                  ) : (
+                    <div className="absolute inset-0 flex items-center justify-center text-sm md:text-base text-gray-400">
+                      暂无生成图片
+                    </div>
+                  )}
+                </div>
               </div>
             </div>
-          </div>
 
-          {/* 分析按钮 */}
-          <div className="mt-8 text-center">
-            <button
-              onClick={handleSubmit}
-              disabled={!selectedImage || loading}
-              className="bg-purple-600 hover:bg-purple-700 disabled:opacity-50 disabled:cursor-not-allowed px-8 py-3 rounded-lg font-medium flex items-center gap-2 mx-auto"
-            >
-              {loading ? (
-                <>
-                  <LoadingSpinner size="sm" />
-                  分析中...
-                </>
-              ) : (
-                <>
-                  <Wand2 className="h-5 w-5" />
-                  开始分析
-                </>
-              )}
-            </button>
-          </div>
-
-          {/* 分析结果 */}
-          {analysisResult && (
-            <div className="mt-12 border border-gray-800 rounded-lg p-6">
-              <h2 className="text-xl font-semibold mb-6">分析结果</h2>
-              
-              {/* 检测到的服装 */}
-              <div className="mb-8">
-                <h3 className="text-lg font-medium mb-4">检测到的服装</h3>
-                <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                  {analysisResult.detected_items?.map((item: any, index: number) => (
-                    <div
-                      key={index}
-                      className="bg-gray-900 rounded-lg p-4"
-                    >
-                      <p className="font-medium mb-2">{item.item}</p>
-                      <p className="text-sm text-gray-400">
-                        置信度: {(item.confidence * 100).toFixed(1)}%
-                      </p>
-                    </div>
-                  ))}
+            {/* 分析结果 */}
+            {analysisResult && (
+              <div className="bg-white/5 rounded-xl p-4 md:p-6 border border-white/10">
+                <h3 className="text-xl font-semibold mb-4 md:mb-6 bg-gradient-to-r from-blue-400 to-violet-400 text-transparent bg-clip-text">
+                  分析结果
+                </h3>
+                
+                {/* 评分 */}
+                <div className="grid grid-cols-2 md:grid-cols-3 gap-3 md:gap-4 mb-6">
+                  <div className="bg-white/5 rounded-lg p-3 md:p-4 border border-white/10 hover:border-blue-400/50 transition-colors">
+                    <p className="text-base md:text-lg font-semibold text-gray-300">总体评分</p>
+                    <p className="text-2xl md:text-3xl font-bold bg-gradient-to-r from-blue-400 to-violet-400 text-transparent bg-clip-text">
+                      {analysisResult.analysis.scores.overall.toFixed(1)}
+                    </p>
+                  </div>
+                  <div className="bg-white/5 rounded-lg p-3 md:p-4 border border-white/10 hover:border-blue-400/50 transition-colors">
+                    <p className="text-base md:text-lg font-semibold text-gray-300">风格统一</p>
+                    <p className="text-2xl md:text-3xl font-bold bg-gradient-to-r from-blue-400 to-violet-400 text-transparent bg-clip-text">
+                      {analysisResult.analysis.scores.style.toFixed(1)}
+                    </p>
+                  </div>
+                  <div className="col-span-2 md:col-span-1 bg-white/5 rounded-lg p-3 md:p-4 border border-white/10 hover:border-blue-400/50 transition-colors">
+                    <p className="text-base md:text-lg font-semibold text-gray-300">实用性</p>
+                    <p className="text-2xl md:text-3xl font-bold bg-gradient-to-r from-blue-400 to-violet-400 text-transparent bg-clip-text">
+                      {analysisResult.analysis.scores.practicality.toFixed(1)}
+                    </p>
+                  </div>
                 </div>
-              </div>
 
-              {/* 评分 */}
-              <div className="mb-8">
-                <h3 className="text-lg font-medium mb-4">穿搭评分</h3>
-                <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                  {Object.entries(analysisResult.scores || {}).map(([key, value]: [string, any]) => (
-                    <div
-                      key={key}
-                      className="bg-gray-900 rounded-lg p-4"
-                    >
-                      <p className="font-medium mb-2">
-                        {key === 'overall' ? '整体评分' :
-                         key === 'style' ? '风格统一度' :
-                         key === 'practicality' ? '实用性' : key}
-                      </p>
-                      <p className="text-2xl font-bold text-purple-400">
-                        {(value * 10).toFixed(1)}
-                      </p>
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              {/* 建议 */}
-              {analysisResult.recommendations && (
-                <div className="mb-8">
-                  <h3 className="text-lg font-medium mb-4">穿搭建议</h3>
-                  <ul className="space-y-2">
-                    {analysisResult.recommendations.map((rec: string, index: number) => (
-                      <li
-                        key={index}
-                        className="flex items-start gap-2 text-gray-300"
-                      >
-                        <span className="text-purple-400">•</span>
-                        {rec}
-                      </li>
+                {/* 优点 */}
+                <div className="mb-4 md:mb-6">
+                  <h4 className="text-base md:text-lg font-semibold mb-2 md:mb-3 text-blue-400">搭配优点</h4>
+                  <ul className="list-disc list-inside space-y-1.5 md:space-y-2 text-sm md:text-base text-gray-300">
+                    {analysisResult.analysis.advantages.map((adv: string, i: number) => (
+                      <li key={i} className="hover:text-blue-400 transition-colors">{adv}</li>
                     ))}
                   </ul>
                 </div>
-              )}
 
-              {/* 适合场合 */}
-              {analysisResult.occasions && (
-                <div>
-                  <h3 className="text-lg font-medium mb-4">适合场合</h3>
-                  <div className="flex flex-wrap gap-2">
-                    {analysisResult.occasions.map((occasion: string, index: number) => (
-                      <span
-                        key={index}
-                        className="bg-purple-600/20 text-purple-400 px-3 py-1 rounded-full text-sm"
-                      >
-                        {occasion}
-                      </span>
+                {/* 建议 */}
+                <div className="mb-4 md:mb-6">
+                  <h4 className="text-base md:text-lg font-semibold mb-2 md:mb-3 text-violet-400">搭配建议</h4>
+                  <ul className="list-disc list-inside space-y-1.5 md:space-y-2 text-sm md:text-base text-gray-300">
+                    {analysisResult.analysis.recommendations.map((rec: string, i: number) => (
+                      <li key={i} className="hover:text-violet-400 transition-colors">{rec}</li>
                     ))}
-                  </div>
+                  </ul>
                 </div>
-              )}
-            </div>
-          )}
+
+                {/* 场合 */}
+                <div className="mb-4 md:mb-6">
+                  <h4 className="text-base md:text-lg font-semibold mb-2 md:mb-3 text-blue-400">适合场合</h4>
+                  <ul className="list-disc list-inside space-y-1.5 md:space-y-2 text-sm md:text-base text-gray-300">
+                    {analysisResult.analysis.occasions.map((occ: string, i: number) => (
+                      <li key={i} className="hover:text-blue-400 transition-colors">{occ}</li>
+                    ))}
+                  </ul>
+                </div>
+
+                {/* 生成按钮 */}
+                <button
+                  className="w-full bg-gradient-to-r from-blue-500 to-violet-500 hover:from-blue-600 hover:to-violet-600 text-white font-semibold py-2.5 md:py-3 px-4 md:px-6 rounded-lg transition-all duration-300 shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed text-sm md:text-base"
+                  onClick={handleGenerate}
+                  disabled={loading}
+                >
+                  {loading ? (
+                    <div className="flex items-center justify-center gap-2">
+                      <LoadingSpinner />
+                      <span>处理中...</span>
+                    </div>
+                  ) : (
+                    '根据建议生成新穿搭'
+                  )}
+                </button>
+              </div>
+            )}
+
+            {/* 分析按钮 */}
+            {previewUrl && !analysisResult && (
+              <button
+                className="w-full bg-gradient-to-r from-blue-500 to-violet-500 hover:from-blue-600 hover:to-violet-600 text-white font-semibold py-2.5 md:py-3 px-4 md:px-6 rounded-lg transition-all duration-300 shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed text-sm md:text-base"
+                onClick={handleAnalyze}
+                disabled={loading}
+              >
+                {loading ? (
+                  <div className="flex items-center justify-center gap-2">
+                    <LoadingSpinner />
+                    <span>分析中...</span>
+                  </div>
+                ) : (
+                  '开始分析'
+                )}
+              </button>
+            )}
+          </div>
         </div>
       </div>
     </div>
