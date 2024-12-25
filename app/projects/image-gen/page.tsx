@@ -1,18 +1,33 @@
 'use client'
 
 import { useState } from 'react'
-import { Navigation } from '@/components/Navigation'
+import Navigation from '@/components/Navigation'
 import { LoadingSpinner } from '@/components/ui/loading'
 import { CloudUpload, Image as ImageIcon, Wand2 } from 'lucide-react'
 import Image from 'next/image'
 import './styles.css'
+
+interface AnalysisResult {
+  scores: {
+    overall: number
+    style: number
+    practicality: number
+  }
+  advantages: string[]
+  recommendations: string[]
+  occasions: string[]
+}
+
+interface ApiResponse {
+  analysis: AnalysisResult
+}
 
 export default function ImageGenPage() {
   const [selectedFile, setSelectedFile] = useState<File | null>(null)
   const [previewUrl, setPreviewUrl] = useState<string>('')
   const [generatedUrl, setGeneratedUrl] = useState<string>('')
   const [loading, setLoading] = useState(false)
-  const [analysisResult, setAnalysisResult] = useState<any>(null)
+  const [analysisResult, setAnalysisResult] = useState<AnalysisResult | null>(null)
 
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
@@ -73,7 +88,7 @@ export default function ImageGenPage() {
         throw new Error(data.error)
       }
 
-      setAnalysisResult(data)
+      setAnalysisResult(data.analysis)
     } catch (error) {
       console.error('Error:', error)
       alert('分析图片时出错：' + (error as Error).message)
@@ -120,7 +135,7 @@ export default function ImageGenPage() {
         <div className="max-w-4xl mx-auto">
           <div className="bg-white/5 backdrop-blur-lg rounded-2xl p-4 md:p-8 border border-white/10 shadow-xl">
             <h1 className="text-2xl md:text-3xl font-bold text-center mb-6 md:mb-8 bg-gradient-to-r from-blue-400 to-violet-400 text-transparent bg-clip-text">
-              AI 穿搭分析
+              AI 搭分析
             </h1>
             
             {/* 上传区域 */}

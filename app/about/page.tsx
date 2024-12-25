@@ -1,6 +1,6 @@
 import { Button } from '@/components/ui/button'
 import { Mail, Github, Twitter } from 'lucide-react'
-import { Navigation } from '@/components/Navigation'
+import Navigation from '@/components/Navigation'
 
 export default function AboutPage() {
   return (
@@ -26,7 +26,7 @@ export default function AboutPage() {
           <h2 className="text-2xl font-semibold mb-6">我们的使命</h2>
           <p className="text-gray-300 mb-8">
             通过持续创新和技术突破，为人类社会带来积极的改变。
-            我们相信技术的力量可以帮助解决人类面临的重大��战，
+            我们相信技术的力量可以帮助解决人类面临的重大挑战，
             创造更美好的未来。
           </p>
           <div className="grid gap-6 md:grid-cols-3">
@@ -59,7 +59,7 @@ export default function AboutPage() {
               <h3 className="text-xl font-semibold mb-2">张博士</h3>
               <p className="text-blue-400 mb-4">首席研究员</p>
               <p className="text-gray-400 mb-6">
-                专注于量子计算和机器学习领域，拥有十年研究经验。
+                专注于量子计算和机器学习领域，拥���十年研究经验。
               </p>
             </div>
           ))}

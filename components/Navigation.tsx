@@ -5,7 +5,7 @@ import Link from 'next/link'
 import { Search, Menu, X } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 
-export function Navigation() {
+export default function Navigation() {
   const [isOpen, setIsOpen] = useState(false)
 
   return (

@@ -1,9 +1,8 @@
 import Image from 'next/image'
-import { Search } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import Link from 'next/link'
-import { Navigation } from '@/components/Navigation'
+import Navigation from '@/components/Navigation'
 
 export default function Home() {
   return (

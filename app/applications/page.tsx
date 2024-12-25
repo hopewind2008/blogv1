@@ -1,7 +1,7 @@
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { ArrowRight, Brain, Cpu, Globe } from 'lucide-react'
-import { Navigation } from '@/components/Navigation'
+import Navigation from '@/components/Navigation'
 
 export default function ApplicationsPage() {
   return (

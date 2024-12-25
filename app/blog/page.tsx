@@ -1,7 +1,7 @@
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import { Search, Filter } from 'lucide-react'
-import { Navigation } from '@/components/Navigation'
+import Navigation from '@/components/Navigation'
 
 export default function BlogPage() {
   return (
@@ -60,7 +60,7 @@ export default function BlogPage() {
                   <time className="text-sm text-gray-400">2023-12-23</time>
                 </div>
                 <h2 className="text-xl font-semibold group-hover:text-blue-400 transition-colors">
-                  量子计算在��工智能中的应用研究
+                  量子计算在工智能中的应用研究
                 </h2>
                 <p className="text-gray-400 line-clamp-3">
                   探索量子计算如何改变人工智能的未来发展方向，以及它在机器学习领域带来的革命性突破...
