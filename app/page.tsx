@@ -10,7 +10,13 @@ export default function Home() {
       {/* Navigation */}
       <nav className="flex items-center justify-between p-6">
         <Link href="/" className="flex items-center space-x-2">
-          <div className="h-6 w-6 bg-blue-500" />
+          <Image
+            src="/images/ai-chat-logo.jpeg"
+            alt="Logo"
+            width={24}
+            height={24}
+            className="rounded-full"
+          />
           <span className="text-lg font-semibold">Hope777</span>
         </Link>
         <div className="hidden md:flex items-center space-x-8">
@@ -25,7 +31,7 @@ export default function Home() {
       {/* Hero Section */}
       <div className="relative h-[800px]">
         <Image
-          src="/placeholder.svg?height=800&width=1920"
+          src="/images/jun-ohashi-O71npBgVnsI-unsplash.jpg"
           alt="Cyberpunk city"
           width={1920}
           height={800}
@@ -46,7 +52,7 @@ export default function Home() {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-12">
               <Link href="/projects/ai-chat" className="group relative overflow-hidden rounded-xl aspect-square">
                 <Image
-                  src="/placeholder.svg?height=400&width=400"
+                  src="/images/zodiac-bg.jpg"
                   alt="AI Chat Project"
                   width={400}
                   height={400}
@@ -64,7 +70,7 @@ export default function Home() {
 
               <Link href="/projects/image-gen" className="group relative overflow-hidden rounded-xl aspect-square">
                 <Image
-                  src="/placeholder.svg?height=400&width=400"
+                  src="/images/jun-ohashi-pSBXlKhkk-M-unsplash.jpg"
                   alt="Image Generation"
                   width={400}
                   height={400}
@@ -82,7 +88,7 @@ export default function Home() {
 
               <Link href="/projects/code-helper" className="group relative overflow-hidden rounded-xl aspect-square">
                 <Image
-                  src="/placeholder.svg?height=400&width=400"
+                  src="/images/jun-ohashi-pSBXlKhkk-M-unsplash.jpg"
                   alt="Code Helper"
                   width={400}
                   height={400}
@@ -100,7 +106,7 @@ export default function Home() {
 
               <Link href="/projects/data-viz" className="group relative overflow-hidden rounded-xl aspect-square">
                 <Image
-                  src="/placeholder.svg?height=400&width=400"
+                  src="/images/jun-ohashi-pSBXlKhkk-M-unsplash.jpg"
                   alt="Data Visualization"
                   width={400}
                   height={400}

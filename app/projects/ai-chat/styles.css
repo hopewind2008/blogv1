@@ -1,0 +1,345 @@
+/* 星空背景动画 */
+@keyframes twinkle {
+  0%, 100% { opacity: 0.18; }
+  50% { opacity: 0.9; }
+}
+
+#stars {
+  width: 1px;
+  height: 1px;
+  background: transparent;
+  box-shadow: 
+    870px 1493px #FFF, 1550px 825px #FFF, 1308px 1011px #FFF,
+    1900px 1200px #FFF, 200px 500px #FFF, 400px 800px #FFF,
+    1000px 300px #FFF, 1800px 1600px #FFF, 600px 1200px #FFF,
+    1200px 400px #FFF, 1600px 900px #FFF, 800px 1800px #FFF;
+  animation: animStar 55s linear infinite, twinkle 3.3s ease-in-out infinite;
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 0;
+}
+
+#stars2 {
+  width: 2px;
+  height: 2px;
+  background: transparent;
+  box-shadow: 
+    1119px 1331px #FFF, 1650px 1025px #FFF, 1408px 1111px #FFF,
+    500px 800px #FFF, 1700px 300px #FFF, 300px 1100px #FFF,
+    1500px 1500px #FFF, 900px 600px #FFF, 1300px 1300px #FFF,
+    700px 200px #FFF, 1100px 800px #FFF, 200px 1500px #FFF;
+  animation: animStar 110s linear infinite, twinkle 4.4s ease-in-out infinite 1s;
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 0;
+}
+
+#stars3 {
+  width: 3px;
+  height: 3px;
+  background: transparent;
+  box-shadow: 
+    1219px 1431px #FFF, 1750px 1125px #FFF, 1508px 1211px #FFF,
+    800px 1000px #FFF, 1200px 600px #FFF, 600px 1400px #FFF,
+    1400px 200px #FFF, 200px 1000px #FFF, 1000px 1600px #FFF,
+    400px 400px #FFF, 1600px 400px #FFF, 100px 900px #FFF;
+  animation: animStar 165s linear infinite, twinkle 5.5s ease-in-out infinite 2s;
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 0;
+}
+
+@keyframes animStar {
+  from {
+    transform: translateY(0);
+  }
+  to {
+    transform: translateY(-2000px);
+  }
+}
+
+/* 神秘卡片样式 */
+.mystical-card {
+  border: 1px solid rgba(138, 43, 226, 0.18);
+  border-radius: 0.75rem;
+  padding: 1rem;
+  position: relative;
+  overflow: hidden;
+  transition: all 0.55s ease;
+  animation: cardFloat 6.6s ease-in-out infinite;
+}
+
+@media (min-width: 768px) {
+  .mystical-card {
+    border-radius: 1rem;
+    padding: 2rem;
+  }
+}
+
+@keyframes cardFloat {
+  0%, 100% {
+    transform: translateY(0);
+    box-shadow: 0 0 18px rgba(138, 43, 226, 0.18);
+  }
+  50% {
+    transform: translateY(-9px);
+    box-shadow: 0 0 27px rgba(138, 43, 226, 0.36);
+  }
+}
+
+.mystical-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(138, 43, 226, 0.18),
+    rgba(138, 43, 226, 0.36),
+    rgba(138, 43, 226, 0.18),
+    transparent
+  );
+  animation: shine 2.2s infinite;
+}
+
+@keyframes shine {
+  0% {
+    left: -100%;
+    opacity: 0.5;
+  }
+  50% {
+    opacity: 1;
+  }
+  100% {
+    left: 100%;
+    opacity: 0.5;
+  }
+}
+
+/* 星座按钮样式 */
+.mystical-btn {
+  background: rgba(0, 0, 0, 0.27);
+  border: 1px solid rgba(138, 43, 226, 0.27);
+  border-radius: 0.375rem;
+  padding: 0.375rem;
+  color: #fff;
+  transition: all 0.33s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  overflow: hidden;
+  transform-origin: center;
+  font-size: 0.875rem;
+}
+
+@media (min-width: 768px) {
+  .mystical-btn {
+    border-radius: 0.5rem;
+    padding: 0.5rem;
+    font-size: 1rem;
+  }
+}
+
+.mystical-btn:hover {
+  border-color: rgba(138, 43, 226, 0.72);
+  box-shadow: 0 0 18px rgba(138, 43, 226, 0.36);
+  transform: translateY(-3.6px) scale(1.045);
+}
+
+.mystical-btn.selected {
+  background: rgba(138, 43, 226, 0.27);
+  border-color: rgba(138, 43, 226, 0.9);
+  box-shadow: 0 0 27px rgba(138, 43, 226, 0.54);
+  animation: pulse 2.2s infinite;
+}
+
+@keyframes pulse {
+  0% {
+    box-shadow: 0 0 18px rgba(138, 43, 226, 0.36);
+  }
+  50% {
+    box-shadow: 0 0 27px rgba(138, 43, 226, 0.72);
+  }
+  100% {
+    box-shadow: 0 0 18px rgba(138, 43, 226, 0.36);
+  }
+}
+
+.btn-content {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.25rem;
+}
+
+@media (min-width: 768px) {
+  .btn-content {
+    gap: 0.5rem;
+  }
+}
+
+/* 占卜按钮样式 */
+.fortune-btn {
+  background: linear-gradient(45deg, #9333ea, #db2777);
+  border: none;
+  border-radius: 0.375rem;
+  padding: 0.625rem 1.5rem;
+  color: white;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  overflow: hidden;
+  font-size: 0.875rem;
+}
+
+@media (min-width: 768px) {
+  .fortune-btn {
+    border-radius: 0.5rem;
+    padding: 0.75rem 2rem;
+    font-size: 1rem;
+  }
+}
+
+.fortune-btn::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.36),
+    rgba(255, 255, 255, 0.54),
+    rgba(255, 255, 255, 0.36),
+    transparent
+  );
+  animation: fortuneShine 3.3s infinite;
+}
+
+@keyframes fortuneShine {
+  0% {
+    left: -100%;
+    opacity: 0.63;
+  }
+  50% {
+    opacity: 0.9;
+  }
+  100% {
+    left: 100%;
+    opacity: 0.63;
+  }
+}
+
+.fortune-btn:hover:not(:disabled) {
+  transform: translateY(-3.6px) scale(1.045);
+  box-shadow: 0 0 27px rgba(219, 39, 119, 0.54);
+  animation: fortunePulse 2.2s infinite;
+}
+
+@keyframes fortunePulse {
+  0% {
+    box-shadow: 0 0 18px rgba(219, 39, 119, 0.36);
+  }
+  50% {
+    box-shadow: 0 0 27px rgba(219, 39, 119, 0.72);
+  }
+  100% {
+    box-shadow: 0 0 18px rgba(219, 39, 119, 0.36);
+  }
+}
+
+/* 预测内容样式 */
+.prediction-content {
+  animation: fadeInUp 0.88s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  font-size: 0.875rem;
+}
+
+@media (min-width: 768px) {
+  .prediction-content {
+    font-size: 1rem;
+  }
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(18px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.prediction-content::before {
+  content: '';
+  position: absolute;
+  inset: -1px;
+  background: linear-gradient(45deg, #9333ea, #db2777);
+  border-radius: inherit;
+  padding: 1px;
+  -webkit-mask: 
+    linear-gradient(#fff 0 0) content-box, 
+    linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  opacity: 0.45;
+  animation: borderGlow 3.3s infinite;
+}
+
+@keyframes borderGlow {
+  0%, 100% {
+    opacity: 0.27;
+  }
+  50% {
+    opacity: 0.72;
+  }
+}
+
+/* 输入框焦点效果 */
+input:focus, select:focus {
+  outline: none;
+  box-shadow: 0 0 13.5px rgba(138, 43, 226, 0.36);
+  animation: inputPulse 2.2s infinite;
+}
+
+@keyframes inputPulse {
+  0%, 100% {
+    box-shadow: 0 0 9px rgba(138, 43, 226, 0.27);
+  }
+  50% {
+    box-shadow: 0 0 18px rgba(138, 43, 226, 0.54);
+  }
+}
+
+/* 渐变文字效果 */
+.gradient-text {
+  background: linear-gradient(45deg, #9333ea, #db2777);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  animation: gradientMove 3.3s ease infinite;
+  background-size: 200% 200%;
+}
+
+@keyframes gradientMove {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+} 
