@@ -35,7 +35,7 @@ export async function POST(request: Request) {
 
     // 调用 Gemini API 分析图片
     const response = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=AIzaSyCiZNOlYHtzgCSiGHRRhXoyd93_DirDSbo`,
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-pro-vision:generateContent?key=AIzaSyCiZNOlYHtzgCSiGHRRhXoyd93_DirDSbo`,
       {
         method: 'POST',
         headers: {
