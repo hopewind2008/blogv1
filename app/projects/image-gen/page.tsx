@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Navigation from '@/components/Navigation'
 import { LoadingSpinner } from '@/components/ui/loading'
 import { CloudUpload, Image as ImageIcon, Wand2 } from 'lucide-react'
@@ -25,7 +25,7 @@ export default function ImageGenPage() {
   const [loading, setLoading] = useState(false)
   const [analysisResult, setAnalysisResult] = useState<AnalysisResult | null>(null)
 
-  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
     if (!file) return
 
@@ -38,13 +38,16 @@ export default function ImageGenPage() {
 
     setSelectedFile(file)
     const reader = new FileReader()
-    reader.onload = (e) => {
-      setPreviewUrl(e.target?.result as string)
+    reader.onload = async (e) => {
+      const url = e.target?.result as string
+      setPreviewUrl(url)
+      // 自动触发分析
+      await handleAnalyze(file)
     }
     reader.readAsDataURL(file)
   }
 
-  const handleDrop = (e: React.DragEvent) => {
+  const handleDrop = async (e: React.DragEvent) => {
     e.preventDefault()
     const file = e.dataTransfer.files[0]
     if (file) {
@@ -55,8 +58,11 @@ export default function ImageGenPage() {
       }
       setSelectedFile(file)
       const reader = new FileReader()
-      reader.onload = (e) => {
-        setPreviewUrl(e.target?.result as string)
+      reader.onload = async (e) => {
+        const url = e.target?.result as string
+        setPreviewUrl(url)
+        // 自动触发分析
+        await handleAnalyze(file)
       }
       reader.readAsDataURL(file)
     }
@@ -66,12 +72,12 @@ export default function ImageGenPage() {
     e.preventDefault()
   }
 
-  const handleAnalyze = async () => {
-    if (!selectedFile) return
+  const handleAnalyze = async (file: File = selectedFile!) => {
+    if (!file) return
 
     setLoading(true)
     const formData = new FormData()
-    formData.append('file', selectedFile)
+    formData.append('file', file)
 
     try {
       const response = await fetch('/api/analyze-outfit', {
@@ -149,8 +155,14 @@ export default function ImageGenPage() {
                   className="hidden"
                   onChange={handleFileSelect}
                 />
-                <CloudUpload className="w-10 h-10 md:w-12 md:h-12 mx-auto mb-3 md:mb-4 text-blue-400" />
-                <p className="text-base md:text-lg mb-2">点击或拖拽图片到这里上传</p>
+                {loading ? (
+                  <LoadingSpinner className="w-10 h-10 md:w-12 md:h-12 mx-auto mb-3 md:mb-4" />
+                ) : (
+                  <CloudUpload className="w-10 h-10 md:w-12 md:h-12 mx-auto mb-3 md:mb-4 text-blue-400" />
+                )}
+                <p className="text-base md:text-lg mb-2">
+                  {loading ? '分析中...' : (previewUrl ? '点击重新上传' : '点击或拖拽图片到这里上传')}
+                </p>
                 <p className="text-xs md:text-sm text-gray-400">支持 jpg、jpeg、png 格式</p>
               </div>
             </div>
@@ -198,6 +210,34 @@ export default function ImageGenPage() {
                   )}
                 </div>
               </div>
+            </div>
+
+            {/* 操作按钮 */}
+            <div className="flex gap-4 justify-center mb-6">
+              <button
+                className={`px-6 py-2 rounded-lg font-medium transition-all duration-300 ${
+                  loading
+                    ? 'bg-gray-500 cursor-not-allowed'
+                    : 'bg-blue-500 hover:bg-blue-600 active:bg-blue-700'
+                }`}
+                onClick={() => handleAnalyze()}
+                disabled={loading || !selectedFile}
+              >
+                {loading ? '分析中...' : (analysisResult ? '重新评价' : '评价')}
+              </button>
+              {analysisResult && (
+                <button
+                  className={`px-6 py-2 rounded-lg font-medium transition-all duration-300 ${
+                    loading
+                      ? 'bg-gray-500 cursor-not-allowed'
+                      : 'bg-violet-500 hover:bg-violet-600 active:bg-violet-700'
+                  }`}
+                  onClick={handleGenerate}
+                  disabled={loading}
+                >
+                  {loading ? '生成中...' : '生成搭配'}
+                </button>
+              )}
             </div>
 
             {/* 分析结果 */}
@@ -250,7 +290,7 @@ export default function ImageGenPage() {
                 </div>
 
                 {/* 场合 */}
-                <div className="mb-4 md:mb-6">
+                <div>
                   <h4 className="text-base md:text-lg font-semibold mb-2 md:mb-3 text-blue-400">适合场合</h4>
                   <ul className="list-disc list-inside space-y-1.5 md:space-y-2 text-sm md:text-base text-gray-300">
                     {analysisResult.occasions.map((occ: string, i: number) => (
@@ -258,41 +298,7 @@ export default function ImageGenPage() {
                     ))}
                   </ul>
                 </div>
-
-                {/* 生成按钮 */}
-                <button
-                  className="w-full bg-gradient-to-r from-blue-500 to-violet-500 hover:from-blue-600 hover:to-violet-600 text-white font-semibold py-2.5 md:py-3 px-4 md:px-6 rounded-lg transition-all duration-300 shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed text-sm md:text-base"
-                  onClick={handleGenerate}
-                  disabled={loading}
-                >
-                  {loading ? (
-                    <div className="flex items-center justify-center gap-2">
-                      <LoadingSpinner />
-                      <span>处理中...</span>
-                    </div>
-                  ) : (
-                    '根据建议生成新穿搭'
-                  )}
-                </button>
               </div>
-            )}
-
-            {/* 分析按钮 */}
-            {previewUrl && !analysisResult && (
-              <button
-                className="w-full bg-gradient-to-r from-blue-500 to-violet-500 hover:from-blue-600 hover:to-violet-600 text-white font-semibold py-2.5 md:py-3 px-4 md:px-6 rounded-lg transition-all duration-300 shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed text-sm md:text-base"
-                onClick={handleAnalyze}
-                disabled={loading}
-              >
-                {loading ? (
-                  <div className="flex items-center justify-center gap-2">
-                    <LoadingSpinner />
-                    <span>分析中...</span>
-                  </div>
-                ) : (
-                  '开始分析'
-                )}
-              </button>
             )}
           </div>
         </div>
